@@ -11,7 +11,7 @@ describe TestStateAttrsParser do
   
   subject { described_class.new("aaa bbb ccc") }
   
-  example do
+  example "substitution" do
     subject.send :example_state=, TestStateAttrsParser::STATE_A
     subject.send(:example_state).should == TestStateAttrsParser::STATE_A
     subject.try do
@@ -26,6 +26,24 @@ describe TestStateAttrsParser do
       string("b").call # This should throw PARSING_FAIL
     end.call
     subject.send(:example_state).should == TestStateAttrsParser::STATE_A
+    subject.send(:input).read.should == "aaa bbb ccc"
+  end
+
+  example "destructive changing" do
+    subject.send :example_state=, [1]
+    subject.send(:example_state).should == [1]
+    subject.try do
+      self.example_state << 2
+      self.example_state.should == [1, 2]
+      try do
+        self.example_state << 3
+        self.example_state.should == [1, 2, 3]
+        string("c").call # This should throw PARSING_FAIL
+      end.call
+      self.example_state.should == [1, 2]
+      string("b").call # This should throw PARSING_FAIL
+    end.call
+    subject.send(:example_state).should == [1]
     subject.send(:input).read.should == "aaa bbb ccc"
   end
 end

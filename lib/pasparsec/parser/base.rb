@@ -142,7 +142,7 @@ class PasParsec::Parser::Base
         bound.input = owner.input
         bound.owner = owner
         owner.state_attrs.each do |a|
-          val = owner.send a
+          val = owner.send(a) and val = val.clone rescue val
 
           if self.class.state_attrs.include? a
             bound.send(:"original_#{a}=", val)
