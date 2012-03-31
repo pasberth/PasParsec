@@ -2,6 +2,24 @@ require 'pasparsec/parser'
 
 module PasParsec::Parser
   
+  class ::Proc
+
+    def to_pasparser
+      ::PasParsec::Parser::ProcParser.new(self)
+    end
+  end
+  
+  class ProcParser < Base
+
+    def initialize proc
+      @proc = proc
+    end
+    
+    def parse *args
+      @proc.call *args
+    end
+  end
+
   class Base
     def regexp re
       re.to_pasparser.bind(self)
@@ -10,7 +28,7 @@ module PasParsec::Parser
 
   class ::Regexp
   
-    def to_pasparser *args, &block
+    def to_pasparser
       ::PasParsec::Parser::RegexpParser.new(self)
     end
   end
@@ -26,6 +44,7 @@ module PasParsec::Parser
   end
 
   class Base
+
     def string str
       str.to_pasparser.bind(self)
     end
@@ -39,6 +58,7 @@ module PasParsec::Parser
   end
 
   class StringParser < Base
+
     def initialize string
       @string = string
     end
@@ -51,12 +71,14 @@ module PasParsec::Parser
   end
 
   class Base
+
     def one_of enum
       ::PasParsec::Parser::OneOf.new(enum).bind(self)
     end
   end
 
   class OneOf < Base
+
     def initialize enum
       @enum = case enum
               when String then enum.enum_for(:each_char)

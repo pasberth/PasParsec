@@ -3,6 +3,18 @@ require 'spec_helper'
 describe PasParsec::Parser::PasParser do
   subject { described_class.new("aaa bbb ccc") }
   
+  describe "block as a combinator" do
+    
+    example do
+      subject.many do
+        result = subject.many1(subject.one_of("abc")).call
+        subject.many(" ").call
+        result.join
+      end.call.should == %w[aaa bbb ccc]
+      subject.send(:input).read == ""
+    end
+  end
+  
   describe "#string" do
     
     example do
