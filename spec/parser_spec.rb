@@ -16,6 +16,19 @@ describe PasParsec::Parser::PasParser do
     end
   end
   
+  describe "#one_of" do
+    
+    example do
+      subject.one_of("abc").call.should == "a"
+      subject.send(:input).read == "aa bbb ccc"
+    end
+    
+    example do
+      subject.many(subject.one_of("abc")).call.should == %w[a a a]
+      subject.send(:input).read == " bbb ccc"
+    end
+  end
+  
   describe "#many" do
   
     example do

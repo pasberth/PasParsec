@@ -49,4 +49,24 @@ module PasParsec::Parser
       end
     end
   end
+
+  class Base
+    def one_of enum
+      ::PasParsec::Parser::OneOf.new(enum).bind(self)
+    end
+  end
+
+  class OneOf < Base
+    def initialize enum
+      @enum = case enum
+              when String then enum.enum_for(:each_char)
+              when Enumerable then enum
+              else enum # raise TypeError, "Can't convert #{enum.class} into Enumerable"
+              end
+    end
+
+    def parse
+      @enum.map(&:build_pasparser!.in(owner)).until { |comb| try { comb.call } }
+    end
+  end
 end

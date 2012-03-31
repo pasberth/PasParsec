@@ -1,0 +1,1 @@
+require 'pasparsec/core_ext/enumerable'
