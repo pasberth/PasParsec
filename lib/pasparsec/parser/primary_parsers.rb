@@ -82,7 +82,9 @@ module PasParsec::Parser
       @enum = case enum
               when String then enum.enum_for(:each_char)
               when Enumerable then enum
-              else enum # raise TypeError, "Can't convert #{enum.class} into Enumerable"
+              else
+                enum.respond_to?(:each) ?
+                    enum.to_enum : raise(TypeError, "Can't convert #{enum.class} into Enumerable")
               end
     end
 
