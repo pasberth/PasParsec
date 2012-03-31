@@ -3,8 +3,9 @@ require 'pasparsec/parser'
 module PasParsec::Parser
   
   class Try < Base
+
     def parse a
-      try_parsing { return a.call } or ( @input.seek(@pos); nil )
+      try_parsing { return a.call } or ( refresh_states; nil )
     end
   end
 

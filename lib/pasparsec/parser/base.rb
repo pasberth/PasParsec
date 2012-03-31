@@ -15,9 +15,7 @@ class PasParsec::Parser::Base
   protected :pos, :pos=, :input, :input=, :owner, :owner=
   
   def call
-    #try_parsing do
-      parse *(@curried_args ||= [])
-      #end or ( @input.seek(@pos); throw PARSING_FAIL )
+    try_parsing { return parse *(@curried_args ||= []) } or ( refresh_states; throw PARSING_FAIL )
   end
   
   def curry *combinators, &proc_as_combinator
@@ -35,17 +33,16 @@ class PasParsec::Parser::Base
     parsing_fail
   end
   
-  #def try &block
-  #  pos = @input.pos
-  #  try_parsing { instance_exec &block } or ( @input.seek(pos); nil )
-  #end
-  
   def try_parsing &block
     catch PARSING_FAIL, &block
   end
   
   def parsing_fail
     throw PARSING_FAIL
+  end
+  
+  def refresh_states
+    @input.seek(@pos)
   end
 
   def bind owner
@@ -67,7 +64,7 @@ class PasParsec::Parser::Base
   end
 
   def to_proc
-    proc { |*a, &b| call *a, &b }
+    proc { |*a, &b| curry(*a, &b).call }
   end
   
   def to_pasparser
