@@ -15,7 +15,9 @@ class PasParsec::Parser::Base
   protected :pos, :pos=, :input, :input=, :owner, :owner=
   
   def call
-    parse *(@curried_args ||= [])
+    #try_parsing do
+      parse *(@curried_args ||= [])
+      #end or ( @input.seek(@pos); throw PARSING_FAIL )
   end
   
   def curry *combinators, &proc_as_combinator
@@ -33,10 +35,10 @@ class PasParsec::Parser::Base
     parsing_fail
   end
   
-  def try &block
-    pos = @input.pos
-    try_parsing { instance_exec &block } or ( @input.seek(pos); nil )
-  end
+  #def try &block
+  #  pos = @input.pos
+  #  try_parsing { instance_exec &block } or ( @input.seek(pos); nil )
+  #end
   
   def try_parsing &block
     catch PARSING_FAIL, &block
@@ -60,7 +62,7 @@ class PasParsec::Parser::Base
     
   def self.add_parser method, klass
     define_method method do |*args, &block|
-      klass.new.bind(self).curry!(*args, &block)
+      build_pasparser!(klass).curry!(*args, &block)
     end
   end
 

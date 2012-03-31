@@ -88,12 +88,12 @@ describe PasParsec::Parser::PasParser do
   describe "#try" do
   
     example do
-      subject.try { many("b").call }.should == []
+      subject.try { many("b").call }.call.should == []
       subject.send(:input).read == "aaa bbb ccc"
     end
 
     example do
-      subject.try { many1("b").call }.should == nil
+      subject.try { many1("b").call }.call.should == nil
       subject.send(:input).read == "aaa bbb ccc"
     end
   end

@@ -2,10 +2,18 @@ require 'pasparsec/parser'
 
 module PasParsec::Parser
   
+  class Try < Base
+    def parse a
+      try_parsing { return a.call } or ( @input.seek(@pos); nil )
+    end
+  end
+
+  Base.add_parser :try, Try
+  
   class Many < Base
     def parse a
       [].tap do |collection|
-        while e = try { a.call }
+        while e = try(a).call
           collection << e
         end
       end
@@ -17,7 +25,7 @@ module PasParsec::Parser
   class Many1 < Base
     def parse a
       collection = [].tap do |collection|
-        while e = try { a.call }
+        while e = try(a).call
           collection << e
         end
       end

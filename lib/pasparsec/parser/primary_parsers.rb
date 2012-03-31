@@ -88,7 +88,7 @@ module PasParsec::Parser
     end
 
     def parse
-      @enum.map(&:build_pasparser!.in(owner)).until { |comb| try { comb.call } }
+      @enum.map(&:build_pasparser!.in(owner)).until { |comb| try(comb).call }
     end
   end
 end
