@@ -14,14 +14,6 @@ class PasParsec::Parser::Base
   attr_accessor :pos, :input, :owner
   protected :pos, :pos=, :input, :input=, :owner, :owner=
   
-  def input
-    if !@input and @owner
-      owner.input
-    elsif @input
-      @input
-    end
-  end
-  
   def call
     parse *(@curried_args ||= [])
   end
