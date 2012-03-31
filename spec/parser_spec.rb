@@ -39,6 +39,15 @@ describe PasParsec::Parser::PasParser do
       subject.many(subject.one_of("abc")).call.should == %w[a a a]
       subject.send(:input).read == " bbb ccc"
     end
+    
+    example do
+      subject.many(
+        subject.one_of([
+          subject.many1(subject.one_of("abc")),
+          subject.many1(" ")
+        ])
+      ).call.should == [%w[a a a], [" "], %w[b b b], [" "], %w[c c c]]
+    end
   end
   
   describe "#many" do
