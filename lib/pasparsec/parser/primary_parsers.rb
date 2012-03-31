@@ -39,8 +39,7 @@ module PasParsec::Parser
       @regexp = regexp
     end
 
-    def parse
-    end
+    # def parse # Unimplementation
   end
 
   class Base
