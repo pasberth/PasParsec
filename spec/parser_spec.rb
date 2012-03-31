@@ -7,8 +7,8 @@ describe PasParsec::Parser::PasParser do
     
     example do
       subject.many do
-        result = subject.many1(subject.one_of("abc")).call
-        subject.many(" ").call
+        result = many1(one_of("abc")).call
+        many(" ").call
         result.join
       end.call.should == %w[aaa bbb ccc]
       subject.send(:input).read == ""

@@ -16,7 +16,7 @@ module PasParsec::Parser
     end
     
     def parse *args
-      @proc.call *args
+      instance_exec *args, &@proc
     end
   end
 

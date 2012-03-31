@@ -1,11 +1,11 @@
 Gem::Specification.new do |s|
-  s.name = "pasparse"
+  s.name = "pasparsec"
   s.version = File.read("VERSION")
   s.authors = ["pasberth"]
   s.description = %{A parsing library like the Parsec}
   s.summary = %q{}
   s.email = "pasberth@gmail.com"
-  s.extra_rdoc_files = ["README.md"]
+  s.extra_rdoc_files = ["README.rdoc"]
   s.rdoc_options = ["--charset=UTF-8"]
   s.homepage = "http://github.com/pasberth/PasParsec"
   s.require_paths = ["lib"]
