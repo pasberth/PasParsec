@@ -28,13 +28,12 @@ class PasParsec::Parser::Base
     close.curry! *combinators, &proc_as_combinator
   end
   
-  def curry! *combinators, &proc_as_combinator
+  def curry! *args, &proc_as_combinator
     @curried_args ||= []
-    combinators.map(&:build_pasparser!.in(owner)).each(&:push.to(@curried_args))
+    args.each &:push.to(@curried_args)
     proc_as_combinator and @curried_args << owner.build_pasparser!(proc_as_combinator)
     self
   end
-
   
   private
 

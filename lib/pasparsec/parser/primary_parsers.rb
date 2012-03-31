@@ -5,91 +5,62 @@ module PasParsec::Parser
   class ::Proc
 
     def to_pasparser
-      ::PasParsec::Parser::ProcParser.new(self)
+      ::PasParsec::Parser::ProcParser.new.curry!(self)
     end
   end
   
   class ProcParser < Base
 
-    def initialize proc
-      @proc = proc
-    end
-    
-    def parse *args
-      instance_exec *args, &@proc
-    end
-  end
-
-  class Base
-    def regexp re
-      re.to_pasparser.bind(self)
+    def parse proc, *args
+      instance_exec *args, &proc
     end
   end
 
   class ::Regexp
   
     def to_pasparser
-      ::PasParsec::Parser::RegexpParser.new(self)
+      ::PasParsec::Parser::RegexpParser.new.curry!(self)
     end
   end
   
   class RegexpParser < Base
 
-    def initialize regexp
-      @regexp = regexp
-    end
-
     # def parse # Unimplementation
   end
 
-  class Base
-
-    def string str
-      str.to_pasparser.bind(self)
-    end
-  end
+  Base.add_parser :regexp, RegexpParser
 
   class ::String
   
     def to_pasparser
-      ::PasParsec::Parser::StringParser.new(self)
+      ::PasParsec::Parser::StringParser.new.curry!(self)
     end
   end
 
   class StringParser < Base
 
-    def initialize string
-      @string = string
-    end
-
-    def parse
-      input.read(@string.bytes.count).tap do |got|
-        parsing_fail if @string != got
+    def parse str
+      input.read(str.bytes.count).tap do |got|
+        parsing_fail if str != got
       end
     end
   end
 
-  class Base
-
-    def one_of enum
-      ::PasParsec::Parser::OneOf.new(enum).bind(self)
-    end
-  end
+  Base.add_parser :string, StringParser
 
   class OneOf < Base
 
-    def initialize enum
-      @enum = case enum
-              when String then enum.enum_for(:each_char)
-              when Enumerable then enum
-              else
-                enum.respond_to?(:each) ?
-                    enum.to_enum : raise(TypeError, "Can't convert #{enum.class} into Enumerable")
-              end
+    def parse enum
+      enum = case enum
+            when String then enum.enum_for(:each_char)
+            when Enumerable then enum
+            else
+              enum.respond_to?(:each) ?
+                  enum.to_enum : raise(TypeError, "Can't convert #{enum.class} into Enumerable")
+            end
+      enum.map(&:build_pasparser!.in(owner)).until { |comb| try(comb).call }
     end
 
-    def parse
-      @enum.map(&:build_pasparser!.in(owner)).until { |comb| try(comb).call }
-    end
+    Base.add_parser :one_of, OneOf
   end
 end
