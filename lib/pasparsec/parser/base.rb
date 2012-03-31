@@ -11,9 +11,15 @@ class PasParsec::Parser::Base
     new
   end
   
+  def self.add_parser method, klass
+    define_method method do |*args, &block|
+      build_pasparser!(klass).curry!(*args, &block)
+    end
+  end
+
   attr_accessor :pos, :input, :owner
   protected :pos, :pos=, :input, :input=, :owner, :owner=
-  
+
   def call
     try_parsing { return parse *(@curried_args ||= []) } or ( refresh_states; throw PARSING_FAIL )
   end
@@ -29,45 +35,48 @@ class PasParsec::Parser::Base
     self
   end
 
-  def parse *combinators
-    parsing_fail
-  end
   
-  def try_parsing &block
-    catch PARSING_FAIL, &block
-  end
-  
-  def parsing_fail
-    throw PARSING_FAIL
-  end
-  
-  def refresh_states
-    @input.seek(@pos)
-  end
+  private
 
-  def bind owner
-    clone.tap do |bound|
-      bound.pos = owner.input.pos
-      bound.input = owner.input
-      bound.owner = owner
+    def parse *combinators
+      parsing_fail
     end
-  end
   
-  def build_pasparser! combinator
-    try_convert_into_pasparser!(combinator).bind(self)
-  end
-    
-  def self.add_parser method, klass
-    define_method method do |*args, &block|
-      build_pasparser!(klass).curry!(*args, &block)
+    def try_parsing &block
+      catch PARSING_FAIL, &block
     end
-  end
+  
+    def parsing_fail
+      throw PARSING_FAIL
+    end
+  
+    def refresh_states
+      @input.seek(@pos)
+    end
 
-  def to_proc
-    proc { |*a, &b| curry(*a, &b).call }
-  end
+
+  protected
+
+    def bind owner
+      clone.tap do |bound|
+        bound.pos = owner.input.pos
+        bound.input = owner.input
+        bound.owner = owner
+      end
+    end
   
-  def to_pasparser
-    self
-  end
+    def build_pasparser! combinator
+      try_convert_into_pasparser!(combinator).bind(self)
+    end
+
+
+  public
+
+    def to_proc
+      proc { |*a, &b| curry(*a, &b).call }
+    end
+  
+    def to_pasparser
+      self
+    end
 end
