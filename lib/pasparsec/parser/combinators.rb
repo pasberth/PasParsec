@@ -68,7 +68,7 @@ module PasParsec::Parser
   class AnyChar < Base
     
     def parse
-      input.each_char.first
+      input.each_char.first or parsing_fail
     end
   end
 

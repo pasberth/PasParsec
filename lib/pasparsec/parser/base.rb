@@ -121,7 +121,11 @@ class PasParsec::Parser::Base
   protected :input, :input=, :owner, :owner=
 
   def call
-    try_parsing { return parse(*convert_args(*(@curried_args ||= []))) } or ( refresh_states; throw PARSING_FAIL )
+    try_parsing do
+     result = parse(*convert_args(*(@curried_args ||= [])))
+     commit_states
+     return result
+   end or ( refresh_states; throw PARSING_FAIL )
   end
   
   def curry *args, &proc_as_combinator
@@ -151,6 +155,11 @@ class PasParsec::Parser::Base
   
     def parsing_fail
       throw PARSING_FAIL
+    end
+    
+    def commit_states
+      state_attrs.each { |attr| owner.send(:"#{attr}=", send(:"#{attr}")) }
+      true
     end
   
     def refresh_states
