@@ -102,7 +102,7 @@ class PasParsec::Parser::Base
   protected :input, :input=, :owner, :owner=
 
   def call
-    try_parsing { return parse *(@curried_args ||= []) } or ( refresh_states; throw PARSING_FAIL )
+    try_parsing { return parse(*convert_args(*(@curried_args ||= []))) } or ( refresh_states; throw PARSING_FAIL )
   end
   
   def curry *args, &proc_as_combinator
@@ -117,8 +117,12 @@ class PasParsec::Parser::Base
   end
   
   private
+  
+    def convert_args *args
+      args
+    end
 
-    def parse *combinators
+    def parse *args
       parsing_fail
     end
   
