@@ -105,8 +105,8 @@ class PasParsec::Parser::Base
     try_parsing { return parse *(@curried_args ||= []) } or ( refresh_states; throw PARSING_FAIL )
   end
   
-  def curry *combinators, &proc_as_combinator
-    clone.curry! *combinators, &proc_as_combinator
+  def curry *args, &proc_as_combinator
+    clone.curry! *args, &proc_as_combinator
   end
   
   def curry! *args, &proc_as_combinator
