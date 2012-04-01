@@ -46,4 +46,20 @@ module PasParsec::Parser
   end
 
   Base.add_parser :between, Between
+
+  class OneOf < Base
+
+    def parse enum
+      enum = case enum
+            when String then enum.enum_for(:each_char)
+            when Enumerable then enum
+            else
+              enum.respond_to?(:each) ?
+                  enum.to_enum : raise(TypeError, "Can't convert #{enum.class} into Enumerable")
+            end
+      enum.map(&:build_pasparser!.in(owner)).until { |comb| try(comb).call }
+    end
+
+    Base.add_parser :one_of, OneOf
+  end
 end
