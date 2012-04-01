@@ -12,6 +12,8 @@ class PasParsec::Parser::Base
   end
   
   def self.add_parser method, pasparser
+    method = method.to_sym
+    pasparsers << method
     define_method method do |*args, &block|
       build_pasparser!(pasparser).curry(*args, &block)
     end
@@ -77,12 +79,29 @@ class PasParsec::Parser::Base
     true
   end
   
+  def self.pasparsers
+    @pasparsers ||= []
+    if self != ::PasParsec::Parser::Base
+      @pasparsers = superclass.pasparsers | @pasparsers
+    else
+      @pasparsers
+    end
+  end
+  
   def self.state_attrs
     @state_attrs ||= []
     if self != ::PasParsec::Parser::Base
       @state_attrs = superclass.state_attrs | @state_attrs
     else
       @state_attrs
+    end
+  end
+  
+  def pasparsers
+    if owner
+      self.class.pasparsers | self.owner.pasparsers
+    else
+      self.class.pasparsers
     end
   end
   
@@ -145,6 +164,16 @@ class PasParsec::Parser::Base
       clone.tap do |bound|
         bound.input = owner.input
         bound.owner = owner
+        owner.pasparsers.each do |a|
+          unless self.class.pasparsers.include? a
+            bound.instance_eval(<<-DEFINE)
+              def #{a}
+                owner.#{a}.bind(self)
+              end
+            DEFINE
+          end
+        end
+
         owner.state_attrs.each do |a|
           val = owner.send(a) and val = val.clone rescue val
 
