@@ -25,12 +25,7 @@ module PasParsec::Parser
   
   class Many1 < Base
     def parse a
-      collection = [].tap do |collection|
-        while e = try(a).call
-          collection << e
-        end
-      end
-
+      collection = many(a).call
       collection.empty? ?
           parsing_fail : collection
     end
