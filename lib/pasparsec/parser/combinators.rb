@@ -1,3 +1,5 @@
+require 'give4each'
+
 require 'pasparsec/parser'
 
 module PasParsec::Parser
