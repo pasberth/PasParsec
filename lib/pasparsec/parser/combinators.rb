@@ -61,14 +61,14 @@ module PasParsec::Parser
               enum.respond_to?(:each) ?
                   enum.to_enum : raise(TypeError, "Can't convert #{enum.class} into Enumerable")
             end
-      [enum]
+      [enum.map &:build_pasparser!.in(owner)]
     end
   end
 
   class OneOf < EnumParserBase
 
     def parse enum
-      enum.map(&:build_pasparser!.in(owner)).until { |comb| try(comb).call }
+      enum.until { |comb| try(comb).call }
     end
   end
 
