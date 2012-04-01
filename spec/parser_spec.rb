@@ -28,6 +28,14 @@ describe PasParsec::Parser::PasParser do
     end
   end
   
+  describe "#any_char" do
+    
+    example do
+      subject.any_char.call.should == "a"
+      subject.send(:input).read == "aa bbb ccc"
+    end
+  end
+  
   describe "#one_of" do
     
     example do
@@ -47,6 +55,28 @@ describe PasParsec::Parser::PasParser do
           subject.many1(" ")
         ])
       ).call.should == [%w[a a a], [" "], %w[b b b], [" "], %w[c c c]]
+    end
+  end
+
+  describe "#none_of" do
+    
+    example do
+      subject.none_of(" bc").call.should == "a"
+      subject.send(:input).read == "aa bbb ccc"
+    end
+    
+    example do
+      subject.many(subject.none_of(" bc")).call.should == %w[a a a]
+      subject.send(:input).read == " bbb ccc"
+    end
+    
+    example do
+      subject.many(
+        subject.one_of([
+          subject.many1(subject.none_of(" c")),
+          subject.many1(" ")
+        ])
+      ).call.should == [%w[a a a], [" "], %w[b b b], [" "]]
     end
   end
   

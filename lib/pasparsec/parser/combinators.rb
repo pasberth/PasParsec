@@ -64,13 +64,35 @@ module PasParsec::Parser
       [enum.map &:build_pasparser!.in(owner)]
     end
   end
+  
+  class AnyChar < Base
+    
+    def parse
+      input.each_char.first
+    end
+  end
+
+  Base.add_parser :any_char, AnyChar
 
   class OneOf < EnumParserBase
 
     def parse enum
-      enum.until { |comb| try(comb).call }
+      enum.until { |comb| try(comb).call } or parsing_fail
     end
   end
 
   Base.add_parser :one_of, OneOf
+
+  class NoneOf < EnumParserBase
+
+    def parse enum
+      enum.each do |comb|
+        parsing_fail if try { comb.call; refresh_states; true }.call
+      end
+
+      any_char.call
+    end
+  end
+
+  Base.add_parser :none_of, NoneOf
 end
