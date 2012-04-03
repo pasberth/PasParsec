@@ -6,7 +6,7 @@ module PasParsec::Parser
   
   class CombinatorBase < Base
     def convert_args *args
-      args.map &:build_pasparser!.in(owner)
+      args.map &:build_pasparser!.in(self)
     end
   end
   
@@ -68,7 +68,7 @@ module PasParsec::Parser
   class AnyChar < Base
     
     def parse
-      input.each_char.first or parsing_fail
+      input.sub!(/(.)/, '') && $1 or parsing_fail
     end
   end
 

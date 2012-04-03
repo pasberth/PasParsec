@@ -26,7 +26,7 @@ describe TestStateAttrsParser do
       string("b").call # This should throw PARSING_FAIL
     end.call
     subject.send(:example_state).should == TestStateAttrsParser::STATE_A
-    subject.send(:input).read.should == "aaa bbb ccc"
+    subject.send(:input).should == "aaa bbb ccc"
   end
 
   example "destructive changing" do
@@ -44,6 +44,6 @@ describe TestStateAttrsParser do
       string("b").call # This should throw PARSING_FAIL
     end.call
     subject.send(:example_state).should == [1]
-    subject.send(:input).read.should == "aaa bbb ccc"
+    subject.send(:input).should == "aaa bbb ccc"
   end
 end

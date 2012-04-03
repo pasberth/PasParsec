@@ -39,9 +39,12 @@ module PasParsec::Parser
 
   class StringParser < Base
 
-    def parse str
-      input.read(str.bytes.count).tap do |got|
-        parsing_fail if str != got
+    def parse expecting
+      if input[0, expecting.length] == expecting
+        input.sub!(expecting, '')
+        expecting
+      else
+        parsing_fail
       end
     end
   end

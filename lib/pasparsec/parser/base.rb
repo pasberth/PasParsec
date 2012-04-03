@@ -113,14 +113,50 @@ class PasParsec::Parser::Base
     end
   end
 
-  add_state_attr :pos,
-                 :getter => "input.pos",
-                 :setter => "input.seek val"
-
-  attr_accessor :input, :owner
-  protected :input, :input=, :owner, :owner=
+  add_state_attr :input
+  attr_accessor :owner
+  protected :owner, :owner=
 
   def call
+    owner.pasparsers.each do |a|
+      unless self.class.pasparsers.include? a
+        instance_eval(<<-DEFINE)
+          def #{a}
+            owner.#{a}.bind(self)
+          end
+        DEFINE
+      end
+    end
+
+    owner.state_attrs.each do |a|
+      val = owner.send(a) and val = val.clone rescue val
+
+      if self.class.state_attrs.include? a
+        send(:"original_#{a}=", val)
+      else
+        instance_eval(<<-DEFINE)
+          def #{a}= val
+            owner.send :'#{a}=', val
+          end
+
+          def #{a}
+            owner.send :'#{a}'
+          end
+
+          def original_#{a}= val
+            @_original_#{a} = val
+          end
+
+          def original_#{a}
+            @_original_#{a}
+          end
+        DEFINE
+        send(:"original_#{a}=", val)
+      end
+    end
+
+    refresh_states
+
     try_parsing do
      result = parse(*convert_args(*(@curried_args ||= [])))
      commit_states
@@ -171,45 +207,7 @@ class PasParsec::Parser::Base
 
     def bind owner
       clone.tap do |bound|
-        bound.input = owner.input
         bound.owner = owner
-        owner.pasparsers.each do |a|
-          unless self.class.pasparsers.include? a
-            bound.instance_eval(<<-DEFINE)
-              def #{a}
-                owner.#{a}.bind(self)
-              end
-            DEFINE
-          end
-        end
-
-        owner.state_attrs.each do |a|
-          val = owner.send(a) and val = val.clone rescue val
-
-          if self.class.state_attrs.include? a
-            bound.send(:"original_#{a}=", val)
-          else
-            bound.instance_eval(<<-DEFINE)
-              def #{a}= val
-                owner.send :'#{a}=', val
-              end
-
-              def #{a}
-                owner.send :'#{a}'
-              end
-
-              def original_#{a}= val
-                @_original_#{a} = val
-              end
-
-              def original_#{a}
-                @_original_#{a}
-              end
-            DEFINE
-            bound.send(:"original_#{a}=", val)
-          end
-        end
-        bound.send :refresh_states
       end
     end
   

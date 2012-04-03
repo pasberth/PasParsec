@@ -5,8 +5,7 @@ class PasParsec::Parser::PasParser < PasParsec::Parser::Base
   
   def initialize input=nil, &parser
     if input.respond_to? :to_str
-      self.input = StringIO.new(input)
-      self.pos = 0
+      self.input = input
     end
     @parser = parser
   end
